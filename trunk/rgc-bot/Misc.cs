@@ -14,6 +14,7 @@ namespace rgcbot
         public static int CLIENT_LOGIN_SUCCESS = 1002;
         
         public static int CLIENT_CHAT_SENDMESSAGE = 1101;
+        public static int CLIENT_CHAT_MESSAGE = 1102;
         public static int CLIENT_CHAT_CHANNEL_ADD = 1105;
         public static int CLIENT_CHAT_CHANNEL_JOINREQUEST = 1106;
         public static int CLIENT_CHAT_JOINALLCHANNELS = 1116;
@@ -21,6 +22,9 @@ namespace rgcbot
         public static int CLIENT_CHAT_CHANNELDATA_REFRESH = 1120;
 
         public static int CLIENT_USER_ADD = 1201;
+        public static int CLIENT_SIGN_ADD = 1203;
+        public static int CLIENT_SIGN_REM = 1204;
+
 
         public static int BOT_REGISTRATION_SUCCESS = 902;
         public static int BOT_REGISTRATION_REQUEST = 904;

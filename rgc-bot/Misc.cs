@@ -12,6 +12,10 @@ namespace rgcbot
 
         public static int CLIENT_LOGIN = 1001;
         public static int CLIENT_LOGIN_SUCCESS = 1002;
+        public static int CLIENT_REMOTE_IP = 1009;
+        public static int CLIENT_LOGIN_END = 1010;
+        public static int CLIENT_TIME = 1011;
+        public static int CLIENT_JOINALL_END = 1012;
         
         public static int CLIENT_CHAT_SENDMESSAGE = 1101;
         public static int CLIENT_CHAT_MESSAGE = 1102;
@@ -20,11 +24,14 @@ namespace rgcbot
         public static int CLIENT_CHAT_JOINALLCHANNELS = 1116;
         public static int CLIENT_CHAT_CHANNELDATA = 1117;
         public static int CLIENT_CHAT_CHANNELDATA_REFRESH = 1120;
+        public static int CLIENT_CHAT_CHANNELAL = 1122;
+        public static int CLIENT_CHAT_CHANNELCOUNT = 1124;
 
         public static int CLIENT_USER_ADD = 1201;
         public static int CLIENT_SIGN_ADD = 1203;
         public static int CLIENT_SIGN_REM = 1204;
 
+        public static int CLIENT_GAME_HOSTED = 1304;
 
         public static int BOT_REGISTRATION_SUCCESS = 902;
         public static int BOT_REGISTRATION_REQUEST = 904;
@@ -33,6 +40,15 @@ namespace rgcbot
         public static int CLIENT_VALIDATION_SUCCESS = 1505;
         public static int CLIENT_VALIDATE_BOT = 1509;
 
+        public static int EDIT_EMAIL = 1583;
+
+        public static int CLIENT_BUDDY_ADD = 1601;
+        public static int CLIENT_BUDDY_REM = 1602;
+        public static int CLIENT_BUDDY_STATE = 1603;
+        public static int CLIENT_BUDDY_STATES = 1604;
+
+        public static int GAME_PLAYER_JOINED = 1681;
+        public static int GAME_PLAYER_LEFT = 1682;
 
         public static int CLIENT_SET_CLAN = 3301;
         public static int CLIENT_WC3_KEY = 1013;

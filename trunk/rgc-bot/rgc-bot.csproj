@@ -40,6 +40,7 @@
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommandHandler.cs" />
     <Compile Include="Misc.cs" />
     <Compile Include="IRgcInterface.cs" />
     <Compile Include="RgcPacket.cs" />

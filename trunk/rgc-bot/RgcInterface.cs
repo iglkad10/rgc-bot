@@ -19,8 +19,7 @@ namespace rgcbot
         private byte[] _buffer;
         private int _index;
         private List<int> _ignoredpackets;
-
-        Dictionary<string, int> appearances = new Dictionary<string, int>();
+        RgcEventHandler _handler;
 
         public RgcInterface()
         {
@@ -35,9 +34,22 @@ namespace rgcbot
             _ignoredpackets.Add(RGC.CLIENT_SET_CLAN);
             _ignoredpackets.Add(RGC.CLIENT_WC3_KEY);
             _ignoredpackets.Add(RGC.CLIENT_CHAT_CHANNELDATA_REFRESH);
-            _ignoredpackets.Add(RGC.CLIENT_SIGN_REM);
-            _ignoredpackets.Add(RGC.CLIENT_SIGN_REM);
+            _ignoredpackets.Add(RGC.CLIENT_CHAT_CHANNELAL);
+            _ignoredpackets.Add(RGC.CLIENT_CHAT_CHANNELCOUNT);
+            _ignoredpackets.Add(RGC.CLIENT_JOINALL_END);
+            _ignoredpackets.Add(RGC.CLIENT_REMOTE_IP);
+            _ignoredpackets.Add(RGC.CLIENT_TIME);
+            _ignoredpackets.Add(RGC.CLIENT_LOGIN_END);
+            _ignoredpackets.Add(RGC.CLIENT_GAME_HOSTED);
+            _ignoredpackets.Add(RGC.CLIENT_BUDDY_ADD);
+            _ignoredpackets.Add(RGC.CLIENT_BUDDY_REM);
+            _ignoredpackets.Add(RGC.CLIENT_BUDDY_STATE);
+            _ignoredpackets.Add(RGC.CLIENT_BUDDY_STATES);
+            _ignoredpackets.Add(RGC.GAME_PLAYER_JOINED);
+            _ignoredpackets.Add(RGC.GAME_PLAYER_LEFT);
+            _ignoredpackets.Add(RGC.EDIT_EMAIL);
 
+            _handler = new RgcEventHandler(this);
         }
 
         public bool Connect(string username, string password)
@@ -75,8 +87,10 @@ namespace rgcbot
             }
         }
 
-        public void SendMessage(string message)
+        public void SendMessage(string roomid, string message)
         {
+            RgcPacketMessage pck = new RgcPacketMessage(roomid, message);
+            _stream.Write(pck.ToByteArray(), 0, pck.BytesLength());
         }
 
         void EmptyBuffer(int startindex = 0)
@@ -152,12 +166,14 @@ namespace rgcbot
             {
                 response1 = new RgcPacketChatJoinAllChannels();
                 Globals.Debug("Joining all channels...");
-                //response2 = new RgcPacketJoinRoom("ampulamare");
-                //Globals.Debug("Joining ampulamare...");
+
+                _handler.HandleLoggedIn(_username);
             }
             else if (pck.Code == RGC.CLIENT_CHAT_CHANNEL_ADD)
             {
                 Globals.Debug("Joined channel: " + RgcPacket.DecodeString(pck.Strings[2]) + ", id=" + pck.Strings[0]);
+
+                _handler.HandleSelfJoinedRoom(pck.Strings[0]);
             }
             else if (pck.Code == RGC.CLIENT_USER_ADD)
             {
@@ -167,16 +183,10 @@ namespace rgcbot
                     i += 1; // skip ip
                     string username = RgcPacket.DecodeString(pck.Strings[i]);
 
-                    if (appearances.ContainsKey(username))
-                    {
-                        appearances[username]++;
-                    }
-                    else
-                    {
-                        appearances[username] = 1;
-                    }
-
                     Globals.Debug(" --- Channel: " + pck.Strings[0] + ", joins: " + username);
+
+                    _handler.HandleJoinedRoom(pck.Strings[0], username);
+
                     i += 3; // skip name, level, color
                     if (i >= pck.Strings.Count)
                     {
@@ -222,7 +232,10 @@ namespace rgcbot
             }
             else if (pck.Code == RGC.CLIENT_CHAT_MESSAGE)
             {
-                Globals.Debug(RgcPacket.DecodeString(pck.Strings[2]) + "[" + pck.Strings[0] + "]: " + RgcPacket.DecodeString(pck.Strings[3]));
+                string message = RgcPacket.DecodeString(pck.Strings[3]);
+                Globals.Debug(RgcPacket.DecodeString(pck.Strings[2]) + "[" + pck.Strings[0] + "]: " + message);
+
+                _handler.HandleMessage(pck.Strings[0], RgcPacket.DecodeString(pck.Strings[2]), message);
             }
             else
             {

@@ -10,6 +10,6 @@ namespace rgcbot
         bool Connect(string username, string password);
         void Run();
 
-        void SendMessage(string message);
+        void SendMessage(string roomid, string message);
     }
 }

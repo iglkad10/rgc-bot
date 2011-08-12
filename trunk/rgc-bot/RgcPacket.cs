@@ -164,10 +164,10 @@ namespace rgcbot
 
     class RgcPacketMessage : RgcPacket
     {
-        public RgcPacketMessage(string message)
+        public RgcPacketMessage(string roomid, string message)
         {
             this.code = RGC.CLIENT_CHAT_SENDMESSAGE;
-            this.AddString("227");
+            this.AddString(roomid);
             this.AddString(EncodeString(message));
             EncodePacket();
         }

@@ -15,13 +15,11 @@ namespace rgcbot
         public RgcPacket()
         {
             strings = new List<string>();
-            EncodePacket();
         }
         public RgcPacket(int length, int code)
         {
             this.code = code;
             strings = new List<string>();
-            EncodePacket();
         }
         public void AddString(string data)
         {
@@ -43,6 +41,7 @@ namespace rgcbot
 
         public int Length { get { return length; } set { length = value; } }
         public int Code { get { return code; } set { code = value; } }
+        public List<string> Strings { get { return strings; } }
         public string EncodedBytes { get { return encodedbytes; } }
 
         public static RgcPacket FromByteArray(byte[] bytes)
@@ -56,7 +55,19 @@ namespace rgcbot
                 index++;
             }
             pck.code = Convert.ToInt32(Encoding.ASCII.GetString(bytes, 8, index));
+
             pck.encodedbytes = Encoding.ASCII.GetString(bytes);
+
+            if (index < pck.length)
+            {
+                index = pck.encodedbytes.IndexOf(' ');
+                char[] separator = { ' ' };
+                string[] texts = Encoding.ASCII.GetString(bytes, index, pck.length - index).Split(separator, StringSplitOptions.RemoveEmptyEntries);
+                for (int i = 0; i < texts.Length; i++)
+                {
+                    pck.AddString(texts[i]);
+                }
+            }
 
             return pck;
         }
@@ -72,7 +83,12 @@ namespace rgcbot
         }
         public static string DecodeString(string message)
         {
-            return "";
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i <= message.Length - 2; i += 2)
+            {
+                sb.Append(Convert.ToString(Convert.ToChar(Int32.Parse(message.Substring(i, 2), System.Globalization.NumberStyles.HexNumber))));
+            }
+            return sb.ToString();
         }
 
         public byte[] ToByteArray()
@@ -99,7 +115,7 @@ namespace rgcbot
     {
         public RgcPacketBotRegistration()
         {
-            this.code = RGC.BOT_REGISTRATION_SUCCESS;
+            this.code = RGC.CLIENT_VALIDATE_BOT;
             EncodePacket();
         }
     }
@@ -133,6 +149,15 @@ namespace rgcbot
         {
             this.code = RGC.CLIENT_CHAT_CHANNEL_JOINREQUEST;
             AddString(EncodeString(roomname));
+            EncodePacket();
+        }
+    }
+
+    class RgcPacketChatJoinAllChannels : RgcPacket
+    {
+        public RgcPacketChatJoinAllChannels()
+        {
+            this.code = RGC.CLIENT_CHAT_JOINALLCHANNELS;
             EncodePacket();
         }
     }

@@ -19,11 +19,13 @@ namespace rgcbot
         private byte[] _buffer;
         private int _index;
 
+        Dictionary<string, int> appearances = new Dictionary<string, int>();
+
         public RgcInterface()
         {
             Globals.Debug("Initializing");
             DataAvailable += OnDataReceived;
-            _buffer = new byte[4000];
+            _buffer = new byte[10240];
             EmptyBuffer();
         }
 
@@ -87,46 +89,48 @@ namespace rgcbot
         {
         }
 
-        void EmptyBuffer()
+        void EmptyBuffer(int startindex = 0)
         {
-            for (int i = 0; i < 4000; i++)
+            for (int i = startindex; i < 10240; i++)
             {
                 _buffer[i] = 0;
             }
-            _index = 0;
+            _index = startindex;
         }
 
         private void OnDataReceived(byte[] data, int length)
         {
-            Array.Copy(data, 0, _buffer, _index, length);
-
-            string strData = Encoding.ASCII.GetString(_buffer);
-            strData = strData.Replace("\0", "");
-
-            int pos = 0;
-            while ((pos = strData.IndexOf("000")) != -1)
+            lock (this)
             {
-                int pckLen = Convert.ToInt32(strData.Substring(0, 8)) + 8;
+                Array.Copy(data, 0, _buffer, _index, length);
 
-                if (pckLen > strData.Length)
+                string strData = Encoding.ASCII.GetString(_buffer);
+                strData = strData.Replace("\0", "");
+
+                while (strData != "")
                 {
-                    break;
+                    int pckLen = Convert.ToInt32(strData.Substring(0, 8)) + 8;
+
+                    if (pckLen > strData.Length)
+                    {
+                        break;
+                    }
+
+                    string pckStr = strData.Substring(0, pckLen);
+                    //Globals.Debug(" <--- " + pckStr);
+                    ProcessPacket(Encoding.ASCII.GetBytes(pckStr));
+                    strData = strData.Substring(pckLen);
                 }
 
-                string pckStr = strData.Substring(pos, pckLen);
-                Globals.Debug(" <--- " + pckStr);
-                ProcessPacket(Encoding.ASCII.GetBytes(pckStr));
-                strData = strData.Substring(pckLen);
-            }
-
-            if (strData != "")
-            {
-                Array.Copy(Encoding.ASCII.GetBytes(strData), 0, _buffer, 0, strData.Length);
-                _index = strData.Length;
-            }
-            else
-            {
-                EmptyBuffer();
+                if (strData != "")
+                {
+                    Array.Copy(Encoding.ASCII.GetBytes(strData), 0, _buffer, 0, strData.Length);
+                    EmptyBuffer(strData.Length);
+                }
+                else
+                {
+                    EmptyBuffer();
+                }
             }
         }
 
@@ -139,29 +143,101 @@ namespace rgcbot
             if (pck.Code == RGC.PPM_REQUEST_VERSION_VALIDATION)
             {
                 response1 = new RgcPacketVersionValidation();
+                Globals.Debug("Sending version validation...");
             }
             else if (pck.Code == RGC.BOT_REGISTRATION_REQUEST)
             {
                 response1 = new RgcPacketBotRegistration();
-                response2 = new RgcPacketClientValidateId();
+                Globals.Debug("Sending bot registration...");
             }
             else if (pck.Code == RGC.CLIENT_VALIDATION_SUCCESS)
             {
                 response1 = new RgcPacketLogin(_username, _password);
+                Globals.Debug("Logging in as " + _username + "...");
             }
             else if (pck.Code == RGC.CLIENT_LOGIN_SUCCESS)
             {
-                response1 = new RgcPacketJoinRoom("Ro.Community");
+                response1 = new RgcPacketChatJoinAllChannels();
+                Globals.Debug("Joining all channels...");
+                response2 = new RgcPacketJoinRoom("ampulamare");
+                Globals.Debug("Joining ampulamare...");
+            }
+            else if (pck.Code == RGC.CLIENT_CHAT_CHANNELDATA)
+            {
+            }
+            else if (pck.Code == RGC.CLIENT_SET_CLAN)
+            {
+            }
+            else if (pck.Code == RGC.CLIENT_WC3_KEY)
+            {
+            }
+            else if (pck.Code == RGC.CLIENT_CHAT_CHANNEL_ADD)
+            {
+                Globals.Debug("Joined channel: " + RgcPacket.DecodeString(pck.Strings[2]) + ", id=" + pck.Strings[0]);
+            }
+            else if (pck.Code == RGC.CLIENT_CHAT_CHANNELDATA_REFRESH)
+            {
+            }
+            else if (pck.Code == RGC.CLIENT_USER_ADD)
+            {
+                int i = 2;
+                while (i < pck.Strings.Count)
+                {
+                    i += 1; // skip ip
+                    string username = RgcPacket.DecodeString(pck.Strings[i]);
+
+                    if (appearances.ContainsKey(username))
+                    {
+                        appearances[username]++;
+                    }
+                    else
+                    {
+                        appearances[username] = 1;
+                    }
+
+                    Globals.Debug(" --- " + username);
+                    i += 3; // skip name, level, color
+                    if (pck.Strings[i] == "0")
+                    {
+                        i += 1; // skip clan, doesn't have any
+                    }
+                    else
+                    {
+                        i += 1; // skip clan
+                        if (pck.Strings[i] == "0")
+                        {
+                            i += 1; // skip prefix, doesn't have one
+                        }
+                        else
+                        {
+                            i += 3; // skip prefix
+                        }
+
+                        if (pck.Strings[i] == "0")
+                        {
+                            i += 1; // skip suffix, doesn't have one
+                        }
+                        else
+                        {
+                            i += 3; // skip suffix
+                        }
+                    }
+                }
+                Globals.Debug("" + appearances.Keys.Count + " users found...");
+            }
+            else
+            {
+                Globals.Debug("! Unknown packet type, code=" + pck.Code + ", length=" + pck.Length);
             }
 
             if (response1 != null)
             {
-                Globals.Debug(" --> " + response1.EncodedBytes);
+                //Globals.Debug(" --> " + response1.EncodedBytes);
                 _stream.Write(response1.ToByteArray(), 0, response1.BytesLength());
             }
             if (response2 != null)
             {
-                Globals.Debug(" --> " + response2.EncodedBytes);
+                //Globals.Debug(" --> " + response2.EncodedBytes);
                 _stream.Write(response2.ToByteArray(), 0, response2.BytesLength());
             }
         }

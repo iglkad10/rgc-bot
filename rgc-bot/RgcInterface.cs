@@ -168,12 +168,14 @@ namespace rgcbot
                 Globals.Debug("Joining all channels...");
 
                 _handler.HandleLoggedIn(_username);
+
+                response2 = new RgcPacketJoinRoom("Romania");
             }
             else if (pck.Code == RGC.CLIENT_CHAT_CHANNEL_ADD)
             {
-                Globals.Debug("Joined channel: " + RgcPacket.DecodeString(pck.Strings[2]) + ", id=" + pck.Strings[0]);
-
-                _handler.HandleSelfJoinedRoom(pck.Strings[0]);
+                string roomname = RgcPacket.DecodeString(pck.Strings[2]);
+                
+                _handler.HandleSelfJoinedRoom(pck.Strings[0], roomname);
             }
             else if (pck.Code == RGC.CLIENT_USER_ADD)
             {
@@ -182,8 +184,6 @@ namespace rgcbot
                 {
                     i += 1; // skip ip
                     string username = RgcPacket.DecodeString(pck.Strings[i]);
-
-                    Globals.Debug(" --- Channel: " + pck.Strings[0] + ", joins: " + username);
 
                     _handler.HandleJoinedRoom(pck.Strings[0], username);
 
@@ -233,23 +233,20 @@ namespace rgcbot
             else if (pck.Code == RGC.CLIENT_CHAT_MESSAGE)
             {
                 string message = RgcPacket.DecodeString(pck.Strings[3]);
-                Globals.Debug(RgcPacket.DecodeString(pck.Strings[2]) + "[" + pck.Strings[0] + "]: " + message);
-
+                
                 _handler.HandleMessage(pck.Strings[0], RgcPacket.DecodeString(pck.Strings[2]), message);
             }
             else
             {
-                Globals.Debug("! Unknown packet type, code=" + pck.Code + ", length=" + pck.Length);
+                //Globals.Debug("! Unknown packet type, code=" + pck.Code + ", length=" + pck.Length);
             }
 
             if (response1 != null)
             {
-                //Globals.Debug(" --> " + response1.EncodedBytes);
                 _stream.Write(response1.ToByteArray(), 0, response1.BytesLength());
             }
             if (response2 != null)
             {
-                //Globals.Debug(" --> " + response2.EncodedBytes);
                 _stream.Write(response2.ToByteArray(), 0, response2.BytesLength());
             }
         }

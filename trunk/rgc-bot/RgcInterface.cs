@@ -2,20 +2,20 @@
 using System.Collections.Generic;
 using System.Text;
 using System.ComponentModel;
-using System.Net;
-using System.Net.Sockets;
 using System.IO;
 using System.Threading;
+using System.Net;
+using System.Net.Sockets;
 
 namespace rgcbot
 {
-    public class RgcInterface : NetworkStreamHandler, IRgcInterface
+    public class RgcInterface : IRgcInterface
     {
-        private NetworkStream _stream;
         private bool _connected;
         private string _username;
         private string _password;
         private TcpClient _client;
+        private NetworkStream _stream;
         private byte[] _buffer;
         private int _index;
 
@@ -24,7 +24,6 @@ namespace rgcbot
         public RgcInterface()
         {
             Globals.Debug("Initializing");
-            DataAvailable += OnDataReceived;
             _buffer = new byte[10240];
             EmptyBuffer();
         }
@@ -37,6 +36,7 @@ namespace rgcbot
             {
                 Globals.Debug("Connecting to " + Globals.HOST + "...");
                 _client.Connect(Globals.HOST, Globals.PORT);
+                _stream = _client.GetStream();
                 _connected = true;
             }
             catch (Exception e)
@@ -54,34 +54,12 @@ namespace rgcbot
 
         public void Run()
         {
-            _stream = _client.GetStream();
-            BackgroundWorker streamWorker = new BackgroundWorker();
-            streamWorker.WorkerSupportsCancellation = true;
-            streamWorker.DoWork += ReadFromStream;
-            streamWorker.RunWorkerCompleted += (s, a) =>
+            while (true)
             {
-                if (_connected)
-                {
-                    streamWorker.RunWorkerAsync(_stream);
-                }
-            };
-            streamWorker.RunWorkerAsync(_stream);
-            StreamError += (ex, stream) =>
-            {
-                if (ex is IOException || ex is InvalidOperationException || ex is ObjectDisposedException)
-                {
-                    _connected = false;
-                    Globals.Debug("Lost connection: " + ex.Message);
-                }
-                else
-                {
-                    throw ex;
-                }
-            };
+                byte[] data = new byte[1024];
+                int nRead = _stream.Read(data, 0, 1024);
 
-            while (streamWorker.IsBusy)
-            {
-                Thread.Sleep(1000);
+                OnDataReceived(data, nRead);
             }
         }
 
@@ -100,37 +78,34 @@ namespace rgcbot
 
         private void OnDataReceived(byte[] data, int length)
         {
-            lock (this)
+            Array.Copy(data, 0, _buffer, _index, length);
+
+            string strData = Encoding.ASCII.GetString(_buffer);
+            strData = strData.Replace("\0", "");
+
+            while (strData != "")
             {
-                Array.Copy(data, 0, _buffer, _index, length);
+                int pckLen = Convert.ToInt32(strData.Substring(0, 8)) + 8;
 
-                string strData = Encoding.ASCII.GetString(_buffer);
-                strData = strData.Replace("\0", "");
-
-                while (strData != "")
+                if (pckLen > strData.Length)
                 {
-                    int pckLen = Convert.ToInt32(strData.Substring(0, 8)) + 8;
-
-                    if (pckLen > strData.Length)
-                    {
-                        break;
-                    }
-
-                    string pckStr = strData.Substring(0, pckLen);
-                    //Globals.Debug(" <--- " + pckStr);
-                    ProcessPacket(Encoding.ASCII.GetBytes(pckStr));
-                    strData = strData.Substring(pckLen);
+                    break;
                 }
 
-                if (strData != "")
-                {
-                    Array.Copy(Encoding.ASCII.GetBytes(strData), 0, _buffer, 0, strData.Length);
-                    EmptyBuffer(strData.Length);
-                }
-                else
-                {
-                    EmptyBuffer();
-                }
+                string pckStr = strData.Substring(0, pckLen);
+                //Globals.Debug(" <--- " + pckStr);
+                ProcessPacket(Encoding.ASCII.GetBytes(pckStr));
+                strData = strData.Substring(pckLen);
+            }
+
+            if (strData != "")
+            {
+                Array.Copy(Encoding.ASCII.GetBytes(strData), 0, _buffer, 0, strData.Length);
+                EmptyBuffer(strData.Length);
+            }
+            else
+            {
+                EmptyBuffer();
             }
         }
 
@@ -197,6 +172,10 @@ namespace rgcbot
 
                     Globals.Debug(" --- " + username);
                     i += 3; // skip name, level, color
+                    if (i >= pck.Strings.Count)
+                    {
+                        break;
+                    }
                     if (pck.Strings[i] == "0")
                     {
                         i += 1; // skip clan, doesn't have any
@@ -204,6 +183,12 @@ namespace rgcbot
                     else
                     {
                         i += 1; // skip clan
+
+                        if (i >= pck.Strings.Count)
+                        {
+                            break;
+                        }
+
                         if (pck.Strings[i] == "0")
                         {
                             i += 1; // skip prefix, doesn't have one
@@ -211,6 +196,11 @@ namespace rgcbot
                         else
                         {
                             i += 3; // skip prefix
+                        }
+
+                        if (i >= pck.Strings.Count)
+                        {
+                            break;
                         }
 
                         if (pck.Strings[i] == "0")
@@ -223,7 +213,7 @@ namespace rgcbot
                         }
                     }
                 }
-                Globals.Debug("" + appearances.Keys.Count + " users found...");
+                Globals.Debug("" + pck.Strings[1] + " users found...");
             }
             else
             {

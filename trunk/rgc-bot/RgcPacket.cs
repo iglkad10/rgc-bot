@@ -62,7 +62,7 @@ namespace rgcbot
             {
                 index = pck.encodedbytes.IndexOf(' ');
                 char[] separator = { ' ' };
-                string[] texts = Encoding.ASCII.GetString(bytes, index, pck.length - index).Split(separator, StringSplitOptions.RemoveEmptyEntries);
+                string[] texts = Encoding.ASCII.GetString(bytes, index, pck.length + 8 - index).Split(separator, StringSplitOptions.RemoveEmptyEntries);
                 for (int i = 0; i < texts.Length; i++)
                 {
                     pck.AddString(texts[i]);

@@ -28,6 +28,7 @@ namespace rgcbot
         public static int CLIENT_CHAT_CHANNELCOUNT = 1124;
 
         public static int CLIENT_USER_ADD = 1201;
+        public static int CLIENT_USER_REM = 1202;
         public static int CLIENT_SIGN_ADD = 1203;
         public static int CLIENT_SIGN_REM = 1204;
 
@@ -70,8 +71,9 @@ namespace rgcbot
             return interf;
         }
 
-        public static void Debug(string message)
+        public static void Debug(string message, ConsoleColor color = ConsoleColor.Gray)
         {
+            Console.ForegroundColor = color;
             Console.WriteLine(message);
         }
     }

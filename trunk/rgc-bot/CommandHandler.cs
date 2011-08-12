@@ -26,7 +26,7 @@ namespace rgcbot
 
         public void HandleSelfJoinedRoom(string roomid, string roomname)
         {
-            Globals.Debug("Joined channel: " + roomname + ", id=" + roomid);
+            Globals.Debug("Joined channel: " + roomname + ", id=" + roomid, ConsoleColor.White);
 
             _rooms[roomid] = roomname;
         }
@@ -47,7 +47,22 @@ namespace rgcbot
                 _roomusers[roomid].Add(username);
             }
 
-            Globals.Debug(_rooms[roomid] + ": join: " + username);
+            Globals.Debug(_rooms[roomid] + ": join: " + username, ConsoleColor.Green);
+        }
+
+        public void HandleLeftRoom(string roomid, string username)
+        {
+            if (username == _username)
+            {
+                return;
+            }
+
+            if (_roomusers.ContainsKey(roomid))
+            {
+                _roomusers[roomid].Remove(username);
+            }
+
+            Globals.Debug(_rooms[roomid] + ": left: " + username, ConsoleColor.Red);
         }
 
         public void HandleMessage(string roomid, string username, string message)
@@ -59,10 +74,19 @@ namespace rgcbot
             {
                 return;
             }
-            if (message == ".help")
+
+            char[] separator = { ' ' };
+            string[] texts = message.Split(separator);
+
+            if (texts[0] == ".help")
             {
-                _interf.SendMessage(roomid, "RGC ChatBot, created by TehLamz0r");
+                OnHelp(roomid, username);
             }
+        }
+
+        private void OnHelp(string roomid, string username)
+        {
+            _interf.SendMessage(roomid, username + ", I am an RGC ChatBot, created by TehLamz0r");
         }
 
     }

@@ -230,10 +230,14 @@ namespace rgcbot
                     }
                 }
             }
+            else if (pck.Code == RGC.CLIENT_USER_REM)
+            {
+                _handler.HandleLeftRoom(pck.Strings[0], RgcPacket.DecodeString(pck.Strings[1]));
+            }
             else if (pck.Code == RGC.CLIENT_CHAT_MESSAGE)
             {
                 string message = RgcPacket.DecodeString(pck.Strings[3]);
-                
+
                 _handler.HandleMessage(pck.Strings[0], RgcPacket.DecodeString(pck.Strings[2]), message);
             }
             else

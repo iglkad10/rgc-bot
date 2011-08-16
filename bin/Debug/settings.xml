@@ -1,0 +1,9 @@
+<settings>
+    <chat>
+        <server>node1.chat.europe.rankedgaming.com</server>
+        <port>25572</port>
+    </chat>
+    <general>
+        <showwarnings>true</showwarnings>
+    </general>
+</settings>

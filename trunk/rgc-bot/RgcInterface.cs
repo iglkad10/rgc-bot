@@ -80,7 +80,7 @@ namespace rgcbot
 
         public void Run()
         {
-            while (true)
+            while (_connected)
             {
                 byte[] data = new byte[1024];
                 try
@@ -253,6 +253,15 @@ namespace rgcbot
                 string message = RgcPacket.DecodeString(pck.Strings[3]);
 
                 _handler.HandleMessage(pck.Strings[0], RgcPacket.DecodeString(pck.Strings[2]), message);
+            }
+            else if (pck.Code == RGC.CLIENT_CHAT_ERROR)
+            {
+                string message = RgcPacket.DecodeString(pck.Strings[0]);
+                Globals.Debug(message, ConsoleColor.Red);
+
+                _connected = false;
+                _stream.Close();
+                _client.Close();
             }
             else
             {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
+using rgcbot;
 
 namespace rgc_bot_app
 {
@@ -9,10 +9,13 @@ namespace rgc_bot_app
     {
         static void Main(string[] args)
         {
-            rgcbot.IRgcInterface interf = rgcbot.Globals.GetInterface();
+            IRgcInterface interf = Globals.GetInterface();
 
             interf.Connect("Ro.Community", "ytinummoc.or");
             interf.Run();
+
+            Globals.Debug("Press any key to exit...");
+            Console.ReadKey();
         }
     }
 }

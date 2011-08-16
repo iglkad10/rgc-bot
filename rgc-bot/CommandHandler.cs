@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace rgcbot
 {
@@ -67,21 +65,29 @@ namespace rgcbot
 
         public void HandleMessage(string roomid, string username, string message)
         {
-
             Globals.Debug(username + "[" + _rooms[roomid] + "]: " + message);
 
+            char[] separator = { ' ' };
+            string[] texts = message.Split(separator);
+
+            
             if (roomid != "238") // REMOVE THIS CHECK (OR REPLACE WITH 227 - Ro.Community ID)
             {
                 return;
             }
 
-            char[] separator = { ' ' };
-            string[] texts = message.Split(separator);
-
             if (texts[0] == ".help")
             {
                 OnHelp(roomid, username);
             }
+            else if (texts[0] == "?")
+            {
+                AiTalk(roomid);
+            }
+        }
+
+        private void AiTalk(string roomid)
+        {
         }
 
         private void OnHelp(string roomid, string username)

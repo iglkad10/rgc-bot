@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Xml;
+using System.Xml.XPath;
 
 namespace rgcbot
 {
@@ -21,6 +23,7 @@ namespace rgcbot
         public static int CLIENT_CHAT_MESSAGE = 1102;
         public static int CLIENT_CHAT_CHANNEL_ADD = 1105;
         public static int CLIENT_CHAT_CHANNEL_JOINREQUEST = 1106;
+        public static int CLIENT_CHAT_WHISPER_TO = 1113;
         public static int CLIENT_CHAT_JOINALLCHANNELS = 1116;
         public static int CLIENT_CHAT_CHANNELDATA = 1117;
         public static int CLIENT_CHAT_CHANNELDATA_REFRESH = 1120;
@@ -59,8 +62,7 @@ namespace rgcbot
     {
         private static IRgcInterface interf = null;
 
-        public static string HOST = "node1.chat.europe.rankedgaming.com";
-        public static int PORT = 37281;
+        private static string XMLFILE = "settings.xml";
 
         public static IRgcInterface GetInterface()
         {
@@ -75,6 +77,25 @@ namespace rgcbot
         {
             Console.ForegroundColor = color;
             Console.WriteLine(message);
+        }
+
+        public static string GetSetting(string xpath)
+        {
+            XPathDocument xdoc = new XPathDocument(XMLFILE);
+            XPathNavigator xnav = xdoc.CreateNavigator();
+
+            XPathExpression xexpr = xnav.Compile(xpath);
+            XPathNodeIterator iterator = xnav.Select(xexpr);
+            try
+            {
+                iterator.MoveNext();
+                return iterator.Current.Value;
+            }
+            catch (Exception e)
+            {
+                Globals.Debug(e.Message);
+                return "";
+            }
         }
     }
 

@@ -11,5 +11,6 @@ namespace rgcbot
         void Run();
 
         void SendMessage(string roomid, string message);
+        void SendWhisper(string username, string message);
     }
 }

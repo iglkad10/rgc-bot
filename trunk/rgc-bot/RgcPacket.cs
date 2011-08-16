@@ -172,4 +172,15 @@ namespace rgcbot
             EncodePacket();
         }
     }
+
+    class RgcPacketWhisper : RgcPacket
+    {
+        public RgcPacketWhisper(string username, string message)
+        {
+            this.code = RGC.CLIENT_CHAT_WHISPER_TO;
+            this.AddString(EncodeString(username));
+            this.AddString(EncodeString(message));
+            EncodePacket();
+        }
+    }
 }

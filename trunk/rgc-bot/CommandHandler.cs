@@ -78,21 +78,42 @@ namespace rgcbot
 
             if (texts[0] == ".help")
             {
-                OnHelp(roomid, username);
+                OnHelp(username);
             }
-            else if (texts[0] == "?")
+            else if (texts[0] == ".alert")
             {
-                AiTalk(roomid);
+                OnAlert(roomid, username, texts);
             }
         }
 
-        private void AiTalk(string roomid)
+        private void OnHelp(string username)
         {
+            _interf.SendWhisper(username, "I am an RGC ChatBot, created by TehLamz0r; Available commands: .help .alert");
         }
 
-        private void OnHelp(string roomid, string username)
+        private void OnAlert(string roomid, string username, string[] texts)
         {
-            _interf.SendMessage(roomid, username + ", I am an RGC ChatBot, created by TehLamz0r");
+            if (texts.Length < 2)
+            {
+                _interf.SendMessage(roomid, username + ", please use .whois <nickname> (nickname can be partial)");
+                return;
+            }
+
+            string tosearch = texts[1].ToLower();
+            string message = "";
+            for (int i = 2; i < texts.Length; i++)
+            {
+                message += texts[i] + " ";
+            }
+
+            List<string> users = _roomusers[roomid];
+            foreach (string s in users)
+            {
+                if (s.ToLower().Contains(tosearch) || tosearch == "*")
+                {
+                    _interf.SendWhisper(s, username + "[" + _rooms[roomid] + "] : ");
+                }
+            }
         }
 
     }

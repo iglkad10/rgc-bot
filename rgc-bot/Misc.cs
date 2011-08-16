@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.XPath;
@@ -23,6 +22,7 @@ namespace rgcbot
         public static int CLIENT_CHAT_MESSAGE = 1102;
         public static int CLIENT_CHAT_CHANNEL_ADD = 1105;
         public static int CLIENT_CHAT_CHANNEL_JOINREQUEST = 1106;
+        public static int CLIENT_CHAT_ERROR = 1109;
         public static int CLIENT_CHAT_WHISPER_TO = 1113;
         public static int CLIENT_CHAT_JOINALLCHANNELS = 1116;
         public static int CLIENT_CHAT_CHANNELDATA = 1117;
@@ -76,7 +76,9 @@ namespace rgcbot
         public static void Debug(string message, ConsoleColor color = ConsoleColor.Gray)
         {
             Console.ForegroundColor = color;
-            Console.WriteLine(message);
+            DateTime now = DateTime.Now;
+            Console.WriteLine("[" + now.Hour + ":" + now.Minute + ":" + now.Second + "] " + message);
+            Console.ForegroundColor = ConsoleColor.Gray;
         }
 
         public static string GetSetting(string xpath)

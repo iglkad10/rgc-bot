@@ -3,14 +3,14 @@ using System.Collections.Generic;
 
 namespace rgcbot
 {
-    class RgcEventHandler
+    class RoCommunityHandler : IRgcEventHandler
     {
         private IRgcInterface _interf;
         private string _username;
         private Dictionary<string, List<string>> _roomusers;
         private Dictionary<string, string> _rooms;
 
-        public RgcEventHandler(IRgcInterface interf)
+        public RoCommunityHandler(IRgcInterface interf)
         {
             _interf = interf;
             _roomusers = new Dictionary<string, List<string>>();

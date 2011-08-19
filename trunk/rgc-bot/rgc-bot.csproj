@@ -32,12 +32,15 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MySql.Data, Version=5.1.7.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CommandHandler.cs" />
+    <Compile Include="Ro.Community.Handler.cs" />
+    <Compile Include="DbInterface.cs" />
+    <Compile Include="IRgcEventHandler.cs" />
     <Compile Include="Misc.cs" />
     <Compile Include="IRgcInterface.cs" />
     <Compile Include="RgcPacket.cs" />

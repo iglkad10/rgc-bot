@@ -19,7 +19,7 @@ namespace rgcbot
         private byte[] _buffer;
         private int _index;
         private List<int> _ignoredpackets;
-        RgcEventHandler _handler;
+        List<IRgcEventHandler> _handlers;
 
         public RgcInterface()
         {
@@ -49,7 +49,8 @@ namespace rgcbot
             //_ignoredpackets.Add(RGC.GAME_PLAYER_LEFT);
             //_ignoredpackets.Add(RGC.EDIT_EMAIL);
 
-            _handler = new RgcEventHandler(this);
+            _handlers = new List<IRgcEventHandler>();
+            _handlers.Add(new RoCommunityHandler(this));
         }
 
         public bool Connect(string username, string password)
@@ -181,15 +182,19 @@ namespace rgcbot
                 response1 = new RgcPacketChatJoinAllChannels();
                 Globals.Debug("Joining all channels...");
 
-                _handler.HandleLoggedIn(_username);
-
-                //response2 = new RgcPacketJoinRoom("Romania");
+                foreach (IRgcEventHandler handler in _handlers)
+                {
+                    handler.HandleLoggedIn(_username);
+                }
             }
             else if (pck.Code == RGC.CLIENT_CHAT_CHANNEL_ADD)
             {
                 string roomname = RgcPacket.DecodeString(pck.Strings[2]);
-                
-                _handler.HandleSelfJoinedRoom(pck.Strings[0], roomname);
+
+                foreach (IRgcEventHandler handler in _handlers)
+                {
+                    handler.HandleSelfJoinedRoom(pck.Strings[0], roomname);
+                }
             }
             else if (pck.Code == RGC.CLIENT_USER_ADD)
             {
@@ -199,7 +204,10 @@ namespace rgcbot
                     i += 1; // skip ip
                     string username = RgcPacket.DecodeString(pck.Strings[i]);
 
-                    _handler.HandleJoinedRoom(pck.Strings[0], username);
+                    foreach (IRgcEventHandler handler in _handlers)
+                    {
+                        handler.HandleJoinedRoom(pck.Strings[0], username);
+                    }
 
                     i += 3; // skip name, level, color
                     if (i >= pck.Strings.Count)
@@ -246,13 +254,19 @@ namespace rgcbot
             }
             else if (pck.Code == RGC.CLIENT_USER_REM)
             {
-                _handler.HandleLeftRoom(pck.Strings[0], RgcPacket.DecodeString(pck.Strings[1]));
+                foreach (IRgcEventHandler handler in _handlers)
+                {
+                    handler.HandleLeftRoom(pck.Strings[0], RgcPacket.DecodeString(pck.Strings[1]));
+                }
             }
             else if (pck.Code == RGC.CLIENT_CHAT_MESSAGE)
             {
                 string message = RgcPacket.DecodeString(pck.Strings[3]);
 
-                _handler.HandleMessage(pck.Strings[0], RgcPacket.DecodeString(pck.Strings[2]), message);
+                foreach (IRgcEventHandler handler in _handlers)
+                {
+                    handler.HandleMessage(pck.Strings[0], RgcPacket.DecodeString(pck.Strings[2]), message);
+                }
             }
             else if (pck.Code == RGC.CLIENT_CHAT_ERROR)
             {

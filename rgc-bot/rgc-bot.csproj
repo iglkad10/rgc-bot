@@ -38,7 +38,7 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Ro.Community.Handler.cs" />
+    <Compile Include="handlers\Ro.Community.Handler.cs" />
     <Compile Include="DbInterface.cs" />
     <Compile Include="IRgcEventHandler.cs" />
     <Compile Include="Misc.cs" />

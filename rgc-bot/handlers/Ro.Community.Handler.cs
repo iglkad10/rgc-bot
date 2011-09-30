@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace rgcbot
 {
-    class RoCommunityHandler : IRgcEventHandler
+    public class RoCommunityHandler : IRgcEventHandler
     {
         private IRgcInterface _interf;
         private string _username;
@@ -95,7 +95,7 @@ namespace rgcbot
         {
             if (texts.Length < 2)
             {
-                _interf.SendMessage(roomid, username + ", please use .whois <nickname> (nickname can be partial)");
+                _interf.SendWhisper(username, username + ", please use .whois <nickname> (nickname can be partial)");
                 return;
             }
 
@@ -111,7 +111,7 @@ namespace rgcbot
             {
                 if (s.ToLower().Contains(tosearch) || tosearch == "*")
                 {
-                    _interf.SendWhisper(s, username + "[" + _rooms[roomid] + "] : ");
+                    _interf.SendWhisper(s, username + "[" + _rooms[roomid] + "] : " + message);
                 }
             }
         }

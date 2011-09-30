@@ -61,7 +61,6 @@ namespace rgcbot
     public class Globals
     {
         private static IRgcInterface interf = null;
-
         private static string XMLFILE = "settings.xml";
 
         public static IRgcInterface GetInterface()
@@ -77,7 +76,7 @@ namespace rgcbot
         {
             Console.ForegroundColor = color;
             DateTime now = DateTime.Now;
-            Console.WriteLine("[" + now.Hour + ":" + now.Minute + ":" + now.Second + "] " + message);
+            Console.WriteLine("[" + now.Hour.ToString("D2") + ":" + now.Minute.ToString("D2") + ":" + now.Second.ToString("D2") + "] " + message);
             Console.ForegroundColor = ConsoleColor.Gray;
         }
 
@@ -100,5 +99,4 @@ namespace rgcbot
             }
         }
     }
-
 }

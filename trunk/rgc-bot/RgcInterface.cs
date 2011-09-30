@@ -50,7 +50,11 @@ namespace rgcbot
             //_ignoredpackets.Add(RGC.EDIT_EMAIL);
 
             _handlers = new List<IRgcEventHandler>();
-            _handlers.Add(new RoCommunityHandler(this));
+        }
+
+        public void AddHandler(IRgcEventHandler handler)
+        {
+            _handlers.Add(handler);
         }
 
         public bool Connect(string username, string password)

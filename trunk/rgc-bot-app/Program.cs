@@ -10,7 +10,8 @@ namespace rgc_bot_app
         static void Main(string[] args)
         {
             IRgcInterface interf = Globals.GetInterface();
-
+            
+            interf.AddHandler(new rgcbot.RoCommunityHandler(interf));
             interf.Connect("Ro.Community", "ytinummoc.or");
             interf.Run();
 
